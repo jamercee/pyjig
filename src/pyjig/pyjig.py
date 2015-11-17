@@ -39,10 +39,10 @@ Carroll-Net, all projects require the following tools; `pylint
 for static code analysis, `sphinx <http://sphinx-doc.org>`_ for project
 documents and `git <http://git-scm.com>`_ for revision control.  And this
 requires setting up directories, config files, a unittest infrastructure and a
-comprehensive Makefile for automating the daily build, test, install tasks.
+comprehensive Makefile for automating the daily build, test and install tasks.
 
 With all these steps, it's easy to miss one, or to make a typo when copying
-from another project which then caused developers to spend time debugging.
+from another project which then causes developers to spend time debugging.
 What was needed was a way to ensure uniform deployment and configuration of our
 python architecture and toolchain.
 
