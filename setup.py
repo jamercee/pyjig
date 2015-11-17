@@ -44,17 +44,21 @@ setup(
 
     # Project details
 
-    description = (''),
+    description = ('Quickly create python projects from templates.'),
     long_description = ''.join(long_description),
     author = 'Jim Carroll',
     author_email = 'jim@carroll.net',
-    #url = 'http://',
-    #download_url = 'http://',
+    url = 'https://github.com/jamercee/pyjig',
+    download_url = 'https://github.com/jamercee/pyjig',
     classifiers = [
         'Development Status :: 5 - Production/Stable',
         'Environment :: Console',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: BSD License',
         'Natural Language :: English',
         'Operating System :: OS Independent',
+        'Topic :: Software Development :: Build Tools',
+        'Topic :: System :: Software Distribution',
         ],
-    license = '',
+    license = 'Pyjig is licensed under the 3-clause BSD License',
     )
