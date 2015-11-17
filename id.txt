@@ -1,0 +1,9 @@
+{u'author': u'Jim Carroll',
+ u'copyright': u'Copyright(c) 2015, Carroll-Net, Inc., All Rights Reserved',
+ u'email': u'jim@carroll.net',
+ u'project_name': u'Pyjig',
+ u'project_short_description': u'Quickly create new projects from templates',
+ u'project_slug': u'pyjig',
+ u'release': u'1.0.1',
+ u'version': u'1.0',
+ u'year': u'2015'}
