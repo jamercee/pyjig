@@ -189,20 +189,21 @@ class Testpyjig(unittest.TestCase):
             proj = pyjig.Pyjig(parser.parse_args(['s1.py', 's2.py', 's3.py']))
             proj.add_project_sourcefile(no_input=True)
 
-            self.assertIn('s1.py', os.listdir('src/myapp'))
-            self.assertIn('s2.py', os.listdir('src/myapp'))
-            self.assertIn('s3.py', os.listdir('src/myapp'))
+            apps = os.listdir('src/myapp')
+            docs = os.listdir('docs')
+            tsts = os.listdir('tests')
 
-            self.assertIn('s1.rst', os.listdir('docs'))
-            self.assertIn('s2.rst', os.listdir('docs'))
-            self.assertIn('s3.rst', os.listdir('docs'))
+            for src in ('s1', 's2', 's3'):
+                self.assertIn(src + '.py', apps)
+                self.assertIn(src + '.rst', docs)
+                self.assertIn('test' + src + '.py', tsts)
 
-            self.assertIn('tests1.py', os.listdir('tests'))
-            self.assertIn('tests2.py', os.listdir('tests'))
-            self.assertIn('tests3.py', os.listdir('tests'))
+                txt = open('docs/%s.rst' % src).read()
+                self.assertIn('.. automodule:: myapp.%s' % src, txt)
 
             # Perform static analysis
 
             subprocess.check_call(['make'], stdout=subprocess.PIPE)
+            subprocess.check_call(['make', 'docs'], stdout=subprocess.PIPE)
         finally:
             os.chdir(cwd)
