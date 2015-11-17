@@ -66,6 +66,7 @@ tests: comp
 
 docs:
 	@$(MAKE) -C docs html
+	@cp docs/_build/html/index.html README.rst
 
 viewdocs: docs
 	@$(BROWSER) docs/_build/html/index.html

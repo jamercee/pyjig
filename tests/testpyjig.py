@@ -16,6 +16,7 @@ Comprehensive unittests for the pyjig module.
 # ----------------------------------------------------------------------------
 # Standard library imports
 # ----------------------------------------------------------------------------
+import ast
 import logging
 import os
 import shutil
@@ -69,6 +70,7 @@ class Testpyjig(unittest.TestCase):
 
     def test_app_project(self):
         r"""create application project"""
+
         parser = pyjig.init_parser()
 
         cwd = os.getcwdu()
@@ -92,13 +94,64 @@ class Testpyjig(unittest.TestCase):
 
             self.assertTrue(os.path.isfile('myapp/.gitignore'))
             self.assertTrue(os.path.isfile('myapp/Makefile'))
+            self.assertTrue(os.path.isfile('myapp/id.txt'))
             self.assertTrue(os.path.isfile('myapp/pylint.rc'))
             self.assertTrue(os.path.isfile('myapp/setup.cfg'))
             self.assertTrue(os.path.isfile('myapp/tests/__init__.py'))
 
+            # Verify 'id.txt' is for pkg
+
+            extra = ast.literal_eval(open('myapp/id.txt').read())
+            self.assertEqual(extra['project_type'], 'app')
+
             # Perform static analysis & rebuild docs (empty project)
 
             os.chdir('myapp')
+            subprocess.check_call(['make'], stdout=subprocess.PIPE)
+            subprocess.check_call(['make', 'docs'], stdout=subprocess.PIPE,
+                                  stderr=subprocess.PIPE)
+        finally:
+            os.chdir(cwd)
+
+    def test_pkg_project(self):
+        r"""create package project"""
+
+        parser = pyjig.init_parser()
+
+        cwd = os.getcwdu()
+        try:
+            os.chdir(self.tmpd)
+
+            proj = pyjig.Pyjig(parser.parse_args(['--pkg', 'mypkg']))
+            self.assertEqual(proj.ptype, 'pkg')
+            self.assertEqual(proj.project_slug, 'mypkg')
+
+            proj.create_project(no_input=True)
+
+            # Directories exist?
+
+            self.assertTrue(os.path.isdir('mypkg'))
+            self.assertTrue(os.path.isdir('mypkg/docs'))
+            self.assertTrue(os.path.isdir('mypkg/src'))
+            self.assertTrue(os.path.isdir('mypkg/tests'))
+
+            # Files exist?
+
+            self.assertTrue(os.path.isfile('mypkg/.gitignore'))
+            self.assertTrue(os.path.isfile('mypkg/Makefile'))
+            self.assertTrue(os.path.isfile('mypkg/id.txt'))
+            self.assertTrue(os.path.isfile('mypkg/pylint.rc'))
+            self.assertTrue(os.path.isfile('mypkg/setup.cfg'))
+            self.assertTrue(os.path.isfile('mypkg/tests/__init__.py'))
+
+            # Verify 'id.txt' is for pkg
+
+            extra = ast.literal_eval(open('mypkg/id.txt').read())
+            self.assertEqual(extra['project_type'], 'pkg')
+
+            # Perform static analysis & rebuild docs (empty project)
+
+            os.chdir('mypkg')
             subprocess.check_call(['make'], stdout=subprocess.PIPE)
             subprocess.check_call(['make', 'docs'], stdout=subprocess.PIPE,
                                   stderr=subprocess.PIPE)
