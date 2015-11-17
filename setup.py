@@ -31,7 +31,7 @@ setup(
     # Project meta-data
 
     name = 'pyjig',
-    version = '1.0.2',
+    version = '1.0.5',
     packages = ['pyjig'],
     package_dir = {'': 'src'},
     entry_points = {'console_scripts': ['pyjig = pyjig.pyjig:main',],},
@@ -43,10 +43,12 @@ setup(
     tests_require   = ['nose>=1.3.4'],
 
     install_requires  = [
-        'pyyaml>=3.11',
         'markupsafe>=0.23',
         'jinja2>=2.7.3',
+
+        'ruamel.yaml>=0.10.12',
         'cookiecutter>=1.3',
+
         'sphinx>=1.3.1',
         'pylint>=1.4.4',
         'flake8>=2.4.1',

@@ -415,12 +415,12 @@ class Pyjig(object):
         if self.args.app:
             self.ptype = 'app'
             self.project_name = self.args.app[0]
-            self.project_slug = self.project_name.lower().replace(' ', '_')
+            self.project_slug = self.project_name.replace(' ', '_')
             self.pdir = os.path.realpath(self.project_slug)
         elif self.args.pkg:
             self.ptype = 'pkg'
             self.project_name = self.args.pkg[0]
-            self.project_slug = self.project_name.lower().replace(' ', '_')
+            self.project_slug = self.project_name.replace(' ', '_')
             self.pdir = os.path.realpath(self.project_slug)
         else:
             self.pdir = find_project_root()
