@@ -394,12 +394,9 @@ def add_pysource(module, tgtdir, no_input=False, extra=None):
             # Copy unittest
             tstdir = os.path.abspath(os.path.join(tgtdir, '../../tests'))
             if os.path.isdir(tstdir):
-                print('tstdir %s EXISTS' % tstdir)
                 src = os.path.join(module, 'test' + module + '.py')
                 tgt = os.path.join(tstdir, 'test' + module + '.py')
-                print('does src %s exist?' % src)
                 if os.path.isfile(src):
-                    print("YES")
                     shutil.copyfile(src, tgt)
     finally:
         os.chdir(cwd)
@@ -469,6 +466,7 @@ class Pyjig(object):
             idfn = os.path.join(self.pdir, 'id.txt')
             extra = ast.literal_eval(open(idfn).read())
             tgtdir = os.path.join(self.pdir, 'src', extra['project_slug'])
+            extra['project'] = self.project_slug
         else:
             extra = {}
             tgtdir = os.getcwdu()
