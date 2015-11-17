@@ -66,7 +66,8 @@ tests: comp
 
 docs:
 	@$(MAKE) -C docs html
-	@cp docs/_build/html/index.html README.rst
+	@python -c "import pyjig.pyjig; print pyjig.pyjig.__doc__" |\
+		pandoc -f rst -t markdown -o README.md 
 
 viewdocs: docs
 	@$(BROWSER) docs/_build/html/index.html
