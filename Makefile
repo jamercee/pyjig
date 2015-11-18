@@ -67,8 +67,7 @@ tests: comp
 
 docs:
 	@$(MAKE) -C docs html
-	@$(PYTHON) setup.py --long-description |\
-		pandoc -f rst -t markdown -o README.md 
+	@$(PYTHON) setup.py --long-description > README.rst
 
 viewdocs: docs
 	@$(BROWSER) docs/_build/html/index.html
