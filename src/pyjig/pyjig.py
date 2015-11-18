@@ -246,7 +246,7 @@ import tempfile
 # ----------------------------------------------------------------------------
 # Module level initializations
 # ----------------------------------------------------------------------------
-__version__    = '1.0.12'
+__version__    = '1.0.13'
 __author__     = 'Jim Carroll'
 __email__      = 'jim@carroll.net'
 __copyright__  = 'Copyright(c) 2015, Carroll-Net, Inc, All Rights Reserved.'
