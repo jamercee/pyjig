@@ -54,6 +54,7 @@ help:
 	@echo "docs - generate documentation"
 	@echo "dist - build package"
 	@echo "install - install package to site-packages"
+	@echo "release - publish to pypi"
 	@echo "clean - remove all built components"
 	@echo "clean-build - remove all built outputs"
 	@echo "clean-pyc - remove Python file artifacts"
@@ -66,17 +67,20 @@ tests: comp
 
 docs:
 	@$(MAKE) -C docs html
-	@python -c "import pyjig.pyjig; print pyjig.pyjig.__doc__" |\
+	@$(PYTHON) setup.py --long-description |\
 		pandoc -f rst -t markdown -o README.md 
 
 viewdocs: docs
 	@$(BROWSER) docs/_build/html/index.html
 
-dist: tests docs
+dist: comp
 	@$(PYTHON) setup.py sdist
 
 install:
 	@$(PYTHON) setup.py install
+
+release: clean
+	@$(PYTHON) setup.py sdist upload
 
 clean: clean-build clean-pyc clean-docs
 
@@ -86,11 +90,13 @@ clean-build:
 	find . -name '*.egg' -exec rm -fr {} +
 
 clean-pyc:
-	find . -name '*.py[co]' -o -name '*.pln' -o -name '~*' -exec -f {} +
+	find . -name '*.py[co]' -exec rm -f {} +
+	find . -name '*.pln' -exec rm -f {} +
+	find . -name '~*' -exec rm -f {} +
 	find . -name '__pycache__' -exec -fr {} +
 
 clean-docs:
-	$(MAKE) -c docs clean
+	$(MAKE) -C docs clean
 	
 debug:
 	@echo OSTYPE:: $(OSTYPE)

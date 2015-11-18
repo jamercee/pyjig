@@ -8,7 +8,7 @@ from setuptools import setup, find_packages
 import os
 import sys
 sys.path.insert(0, os.path.abspath('src'))
-import pyjig
+import pyjig.pyjig
 
 try:
     # http://bugs.python.org/issue15881#msg170215
@@ -17,21 +17,13 @@ try:
 except ImportError:
     pass
 
-long_description = []
-try:
-    with open('docs/index.rst') as fin:
-        for line in fin:
-            if line.startswith('Indicies and tables'):
-                break
-            long_description.append(line)
-except IOError:
-    pass
+long_description = pyjig.pyjig.__doc__
 
 setup(
     # Project meta-data
 
     name = 'pyjig',
-    version = '1.0.5',
+    version = pyjig.pyjig.__version__,
     packages = ['pyjig'],
     package_dir = {'': 'src'},
     entry_points = {'console_scripts': ['pyjig = pyjig.pyjig:main',],},
@@ -74,4 +66,6 @@ setup(
         'Topic :: System :: Software Distribution',
         ],
     license = 'Pyjig is licensed under the 3-clause BSD License',
+
+    platforms = 'any',
     )

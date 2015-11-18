@@ -207,3 +207,29 @@ class Testpyjig(unittest.TestCase):
             subprocess.check_call(['make', 'docs'], stdout=subprocess.PIPE)
         finally:
             os.chdir(cwd)
+
+    def test_project_mixedcase(self):
+        r"""create project name with mixed case"""
+
+        parser = pyjig.init_parser()
+
+        cwd = os.getcwdu()
+        try:
+            os.chdir(self.tmpd)
+
+            proj = pyjig.Pyjig(parser.parse_args(['--app', 'MyApp']))
+            self.assertEqual(proj.ptype, 'app')
+            self.assertEqual(proj.project_slug, 'MyApp')
+
+            proj.create_project(no_input=True)
+
+            # Directories exist?
+
+            self.assertTrue(os.path.isdir('MyApp'))
+
+            # Perform static analysis
+
+            os.chdir('MyApp')
+            subprocess.check_call(['make'], stdout=subprocess.PIPE)
+        finally:
+            os.chdir(cwd)
