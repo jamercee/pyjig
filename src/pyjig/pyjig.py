@@ -17,7 +17,7 @@ which is a command-line utility that creates projects from ``cookiecutters``
 github.com and bitbucket.org). Templates are written in `Jinja
 <http://jina.pocoo.org>`_.
 
-Pyjig uses three public repos:
+Pyjig uses three public repos hosted with github:
 
 +---------------------------------------------------+----------------------------------+
 | Repo                                              | Description                      |
@@ -109,7 +109,6 @@ root directory. It's syntax is written to support `GNU Make
 | help        | Display Makefile help                                                 |
 +-------------+-----------------------------------------------------------------------+
 
-
 Static Analysis
 ---------------
 
@@ -182,6 +181,22 @@ Pyjig borrows it's name from the concept of a jig which is a tool used in metal
 and woodworking. A jig is a template that allows one to make duplicates of
 pieces.  The simplest example is a key duplication machine, which uses one key
 as the guide to make copies.
+
+Installation
+------------
+
+Pyjig is hosted on git hub at https://github.com/jamercee/pyjig
+
+Installation using git::
+
+   git clone https://github.com/jamercee/pyjig
+   cd pyjig
+   python setup.py install
+
+Pyjig can also be installed with pip::
+
+   pip install pyjig
+
 
 ********************
 Command line options
