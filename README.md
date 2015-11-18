@@ -1,5 +1,13 @@
-pyjig - Quickly create python projects from templates
+Pyjig - Quickly create python projects from templates
 =====================================================
+
+Author
+
+:   Jim Carroll &lt;<jim@carroll.net>&gt;
+
+Description
+
+:   Quickly create python projects from templates
 
 Pyjig quickly creates new python projects using pre-created templates.
 Projects can be simple scripts, distutils packages or full blown
@@ -23,7 +31,7 @@ Pyjig uses three public repos:
   <https://github.org/jamercee/cookiecutter-p Python package type projects
   ypkg>                                       
 
-  <https://github.org/jamercee/cookiecutter-p Crete python source file(s)
+  <https://github.org/jamercee/cookiecutter-p Create python source file(s)
   ysource>                                    
   ------------------------------------------------------------------------
 
@@ -37,11 +45,11 @@ Carroll-Net, all projects require the following tools;
 [sphinx](http://sphinx-doc.org) for project documents and
 [git](http://git-scm.com) for revision control. And this requires
 setting up directories, config files, a unittest infrastructure and a
-comprehensive Makefile for automating the daily build, test, install
+comprehensive Makefile for automating the daily build, test and install
 tasks.
 
 With all these steps, it's easy to miss one, or to make a typo when
-copying from another project which then caused developers to spend time
+copying from another project which then causes developers to spend time
 debugging. What was needed was a way to ensure uniform deployment and
 configuration of our python architecture and toolchain.
 
@@ -50,7 +58,7 @@ Project Layout
 
 Each new project will create the following directories and files:
 
-    myproj               Project root
+    myproj               <-- Project root
     +
     |
     |   .gitignore
@@ -60,20 +68,20 @@ Each new project will create the following directories and files:
     |   setup.cfg
     |   setup.py
     |
-    +---.git             Git repository
+    +---.git             <-- Git repository
     |       ...
     |
-    +---docs             Sphinx documentation
+    +---docs             <-- Sphinx documentation
     |       conf.py
     |       index.rst
     |       make.bat
     |       Makefile
     |
-    +---src              Project source code
+    +---src              <-- Project source code
     |   \---myproj
     |           __init__.py
     |
-    \---tests            Unittest infrastructure
+    \---tests            <-- Unittest infrastructure
             __init__.py
 
 Makefile generation
@@ -158,13 +166,13 @@ Two good references for authoring reST documents are
 > -   <https://docs.python.org/devguide/documenting.html>
 > -   <https://pythonhosted.org/an_example_pypi_project/sphinx.html>
 
-Verision Control
-----------------
+Version Control
+---------------
 
-Carroll-Net has adopted [Git](http://git-scm.org) as our version control
-system for software. Git is a fast, reliable distributed revision
-control system. Originally developed for Linux kernel development it is
-now the most widely used source code management tool.
+Carroll-Net has adopted Git as our version control system for software.
+Git is a fast, reliable distributed revision control system. Originally
+developed for Linux kernel development it is now the most widely used
+source code management tool.
 
 Pyjig will initialize a git repository for each new project it creates
 using your local sytem defaults (see [git config
@@ -188,8 +196,27 @@ which uses one key as the guide to make copies.
 ### Command line options
 
 *usage:*
-`pyjig  [-?] [-d] [--pkg PKG] [--app APP] [-x EXCLUDEGIT] [source [source ..]]`
+`pyjig  [-?] [-d] [--pkg PKG] [--app APP] [-x] [source [source ..]]`
 
-#### Positional arguments
+Positional arguments
+--------------------
 
-#### Optional argument:
+source
+
+> Add one or more source file(s) to project. If the current directry is
+> not part of an existing project, the source file will be created, but
+> no project related activities will be taken (no unittest generation,
+> no sphix-docs generation, not added to git...)
+
+Optional argument:
+------------------
+
+-h Display help and exit.
+
+-d Generate diagnotic output.
+
+--pkg PKG Create a distutils package project.
+
+--app APP Create an application type project.
+
+-x Do not initialize git repo and do not add new source to git repo.
