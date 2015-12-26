@@ -14,7 +14,7 @@ which is a command-line utility that creates projects from ``cookiecutters``
 github.com and bitbucket.org). Templates are written in `Jinja
 <http://jina.pocoo.org>`_.
 
-Pyjig uses three public repos:
+Pyjig uses four public repos hosted with github:
 
 +---------------------------------------------------+----------------------------------+
 | Repo                                              | Description                      |
@@ -23,7 +23,9 @@ Pyjig uses three public repos:
 +---------------------------------------------------+----------------------------------+
 | https://github.org/jamercee/cookiecutter-pypkg    | Python package type projects     |
 +---------------------------------------------------+----------------------------------+
-| https://github.org/jamercee/cookiecutter-pysource | Create python source file(s)     |
+| https://github.org/jamercee/cookiecutter-pysource | Create python source             |
++---------------------------------------------------+----------------------------------+
+| https://github.org/jamercee/cookiecutter-pyext    | Create python extension          |
 +---------------------------------------------------+----------------------------------+
 
 Project Motivation
@@ -48,8 +50,6 @@ Project Layout
 Each new project will create the following directories and files::
 
    myproj               <-- Project root
-   +
-   |
    |   .gitignore
    |   id.txt
    |   Makefile
@@ -67,8 +67,7 @@ Each new project will create the following directories and files::
    |       Makefile
    |
    +---src              <-- Project source code
-   |   \---myproj
-   |           __init__.py
+   |       __init__.py
    |
    \---tests            <-- Unittest infrastructure
            __init__.py
@@ -105,7 +104,6 @@ root directory. It's syntax is written to support `GNU Make
 +-------------+-----------------------------------------------------------------------+
 | help        | Display Makefile help                                                 |
 +-------------+-----------------------------------------------------------------------+
-
 
 Static Analysis
 ---------------
@@ -164,10 +162,10 @@ tool.
 Pyjig will initialize a git repository for each new project it creates using
 your local sytem defaults (see `git config ...
 <http://git-scm.com/book/en/v2/Customizing-Git-Git-Configuration>`_.). And each
-time you use Pyjig to add python source to an existing project, pyjig will add
-the source to the repo.
+time you use Pyjig to add to an existing project, pyjig will add the source to
+the repo.
 
-Pyjig will not create the repo is invoked with ``--excludegit`` or of the
+Pyjig will not create the repo if invoked with ``--excludegit`` or of the
 dirctory is a subdirectory of an existing git repository. It detects
 repository membership by invoking `git status
 <http://git-scm.com/docs/git-status>`_.
@@ -180,11 +178,27 @@ and woodworking. A jig is a template that allows one to make duplicates of
 pieces.  The simplest example is a key duplication machine, which uses one key
 as the guide to make copies.
 
+Installation
+------------
+
+Pyjig is hosted on git hub at https://github.com/jamercee/pyjig
+
+Installation using git::
+
+   git clone https://github.com/jamercee/pyjig
+   cd pyjig
+   python setup.py install
+
+Pyjig can also be installed with pip::
+
+   pip install pyjig
+
+
 ********************
 Command line options
 ********************
 
-*usage:* ``pyjig  [-?] [-d] [--pkg PKG] [--app APP] [-x] [source [source ..]]``
+*usage:* ``pyjig  [-?] [-d] [--pkg PKG] [--app APP] [--ext EXT] [-x] [source [source ..]]``
 
 Positional arguments
 --------------------
@@ -205,6 +219,8 @@ Optional argument:
 --pkg PKG   Create a distutils package project.
 
 --app APP   Create an application type project.
+
+--ext EXT   Add an extension module to the existing project.
 
 -x          Do not initialize git repo and do not add new source to git repo.
 
