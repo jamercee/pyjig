@@ -19,6 +19,7 @@ Comprehensive unittests for the pyjig module.
 import ast
 import logging
 import os
+import re
 import shutil
 import subprocess
 import tempfile
@@ -107,9 +108,8 @@ class Testpyjig(unittest.TestCase):
             # Perform static analysis & rebuild docs (empty project)
 
             os.chdir('myapp')
-            subprocess.check_call(['make'], stdout=subprocess.PIPE)
-            subprocess.check_call(['make', 'docs'], stdout=subprocess.PIPE,
-                                  stderr=subprocess.PIPE)
+            subprocess.check_call(['make'])
+            subprocess.check_call(['make', 'docs'])
         finally:
             os.chdir(cwd)
 
@@ -152,9 +152,8 @@ class Testpyjig(unittest.TestCase):
             # Perform static analysis & rebuild docs (empty project)
 
             os.chdir('mypkg')
-            subprocess.check_call(['make'], stdout=subprocess.PIPE)
-            subprocess.check_call(['make', 'docs'], stdout=subprocess.PIPE,
-                                  stderr=subprocess.PIPE)
+            subprocess.check_call(['make'])
+            subprocess.check_call(['make', 'docs'])
         finally:
             os.chdir(cwd)
 
@@ -189,7 +188,7 @@ class Testpyjig(unittest.TestCase):
             proj = pyjig.Pyjig(parser.parse_args(['s1.py', 's2.py', 's3.py']))
             proj.add_project_sourcefile(no_input=True)
 
-            apps = os.listdir('src/myapp')
+            apps = os.listdir('src')
             docs = os.listdir('docs')
             tsts = os.listdir('tests')
 
@@ -199,12 +198,12 @@ class Testpyjig(unittest.TestCase):
                 self.assertIn('test' + src + '.py', tsts)
 
                 txt = open('docs/%s.rst' % src).read()
-                self.assertIn('.. automodule:: myapp.%s' % src, txt)
+                self.assertIn('.. automodule:: %s' % src, txt)
 
             # Perform static analysis
 
-            subprocess.check_call(['make'], stdout=subprocess.PIPE)
-            subprocess.check_call(['make', 'docs'], stdout=subprocess.PIPE)
+            subprocess.check_call(['make'])
+            subprocess.check_call(['make', 'docs'])
         finally:
             os.chdir(cwd)
 
@@ -230,6 +229,98 @@ class Testpyjig(unittest.TestCase):
             # Perform static analysis
 
             os.chdir('MyApp')
-            subprocess.check_call(['make'], stdout=subprocess.PIPE)
+            subprocess.check_call(['make'])
+        finally:
+            os.chdir(cwd)
+
+    def test_add_pyextension(self):
+        r"""test the simple add_pyextension()"""
+
+        cwd = os.getcwdu()
+        try:
+            os.chdir(self.tmpd)
+            pyjig.add_pyextension('mod', self.tmpd, no_input=True)
+            self.assertIn('mod_module.cpp', os.listdir('.'))
+        finally:
+            os.chdir(cwd)
+
+    def test_add_project_extension(self):
+        r"""test adding extension file to existing project."""
+
+        # pylint: disable=too-many-locals
+
+        parser = pyjig.init_parser()
+
+        cwd = os.getcwdu()
+        try:
+            os.chdir(self.tmpd)
+
+            # Create project
+
+            proj = pyjig.Pyjig(parser.parse_args(['--pkg', 'mypkg']))
+            proj.create_project(no_input=True)
+
+            # Add three(3) extension files to project
+
+            os.chdir('mypkg')
+            proj = pyjig.Pyjig(parser.parse_args(['--ext', 'e1']))
+            proj.add_project_extension(no_input=True)
+
+            apps = os.listdir('src')
+            docs = os.listdir('docs')
+            tsts = os.listdir('tests')
+
+            self.assertIn('e1_module.cpp', apps)
+            self.assertIn('e1.rst', docs)
+            self.assertIn('teste1.py', tsts)
+
+            txt = open('docs/e1.rst').read()
+            self.assertIn('.. automodule:: e1', txt)
+
+            # Build extension
+
+            setup = open('setup.py').readlines()
+            import_added = False
+            with open('setup.py', 'wt') as fout:
+                for line in setup:
+                    fout.write(line)
+                    if not import_added and re.match('^from setuptools ', line):
+                        fout.write("from setuptools import Extension\n")
+                        import_added = True
+                    if re.search('package_dir', line):
+                        fout.write("ext_modules=[Extension('mypkg.e1',\n"
+                                   "sources=['src/e1_module.cpp'])],\n")
+
+            subprocess.check_call(['make', 'build'])
+
+            builtdir = ''
+            for dname in os.listdir('build'):
+                if dname.startswith('lib.'):
+                    builtdir = os.path.join('build', dname, 'mypkg')
+                    builtdir = builtdir.replace('\\', '/')
+                    break
+
+            # Perform static analysis
+
+            pylint = open('pylint.rc').readlines()
+            with open('pylint.rc', 'wt') as fout:
+                for line in pylint:
+                    ma = re.match(r'^extension-pkg-whitelist=(.+)$', line)
+                    if ma:
+                        ext = ma.group(1).split(',')
+                        ext = ','.join(ext.append('e1'))
+                        fout.write("extension-pkg-whitelist=%s\n", ext)
+                        continue
+
+                    ma = re.match(r'^init-hook', line)
+                    if ma:
+                        fout.write("init-hook='import os,sys; "
+                                   "sys.path.insert(0, "
+                                   "os.path.abspath(\"%s\"))'\n" % builtdir)
+                        continue
+                    fout.write(line)
+
+            subprocess.check_call(['make', 'tests'])
+            subprocess.check_call(['make', 'docs'])
         finally:
             os.chdir(cwd)

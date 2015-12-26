@@ -17,7 +17,7 @@ which is a command-line utility that creates projects from ``cookiecutters``
 github.com and bitbucket.org). Templates are written in `Jinja
 <http://jina.pocoo.org>`_.
 
-Pyjig uses three public repos hosted with github:
+Pyjig uses four public repos hosted with github:
 
 +---------------------------------------------------+----------------------------------+
 | Repo                                              | Description                      |
@@ -26,7 +26,9 @@ Pyjig uses three public repos hosted with github:
 +---------------------------------------------------+----------------------------------+
 | https://github.org/jamercee/cookiecutter-pypkg    | Python package type projects     |
 +---------------------------------------------------+----------------------------------+
-| https://github.org/jamercee/cookiecutter-pysource | Create python source file(s)     |
+| https://github.org/jamercee/cookiecutter-pysource | Create python source             |
++---------------------------------------------------+----------------------------------+
+| https://github.org/jamercee/cookiecutter-pyext    | Create python extension          |
 +---------------------------------------------------+----------------------------------+
 
 Project Motivation
@@ -51,8 +53,6 @@ Project Layout
 Each new project will create the following directories and files::
 
    myproj               <-- Project root
-   +
-   |
    |   .gitignore
    |   id.txt
    |   Makefile
@@ -70,8 +70,7 @@ Each new project will create the following directories and files::
    |       Makefile
    |
    +---src              <-- Project source code
-   |   \---myproj
-   |           __init__.py
+   |       __init__.py
    |
    \---tests            <-- Unittest infrastructure
            __init__.py
@@ -166,10 +165,10 @@ tool.
 Pyjig will initialize a git repository for each new project it creates using
 your local sytem defaults (see `git config ...
 <http://git-scm.com/book/en/v2/Customizing-Git-Git-Configuration>`_.). And each
-time you use Pyjig to add python source to an existing project, pyjig will add
-the source to the repo.
+time you use Pyjig to add to an existing project, pyjig will add the source to
+the repo.
 
-Pyjig will not create the repo is invoked with ``--excludegit`` or of the
+Pyjig will not create the repo if invoked with ``--excludegit`` or of the
 dirctory is a subdirectory of an existing git repository. It detects
 repository membership by invoking `git status
 <http://git-scm.com/docs/git-status>`_.
@@ -202,7 +201,7 @@ Pyjig can also be installed with pip::
 Command line options
 ********************
 
-*usage:* ``pyjig  [-?] [-d] [--pkg PKG] [--app APP] [-x] [source [source ..]]``
+*usage:* ``pyjig  [-?] [-d] [--pkg PKG] [--app APP] [--ext EXT] [-x] [source [source ..]]``
 
 Positional arguments
 --------------------
@@ -223,6 +222,8 @@ Optional argument:
 --pkg PKG   Create a distutils package project.
 
 --app APP   Create an application type project.
+
+--ext EXT   Add an extension module to the existing project.
 
 -x          Do not initialize git repo and do not add new source to git repo.
 
@@ -287,6 +288,10 @@ def init_parser():
         '--app',
         nargs=1,
         help='Create an application type project')
+    parser.add_argument(
+        '--ext',
+        nargs=1,
+        help='Add extension module to existing project')
     parser.add_argument(
         '-x', '--excludegit',
         action='store_true', default=False,
@@ -361,18 +366,76 @@ def find_project_root():
     return os.path.dirname(idpth)
 
 
+def add_pyextension(module, tgtdir, no_input=False, extra=None):
+    r"""Add new extension *module* to *tgtdir*. If *no_input* is ``True``, user
+    will be prompted to answer questions. *extra* is a dictionary of optional
+    key/values passed to cookiecutter as default overrides. If the key
+    'project_type' exists in extra, then any ``*.rst`` files will be installed
+    in ``tgtdir/../docs`` and any ``test*.py`` will be installed in
+    ``tgtdir/../tests``."""
+
+    extra = extra or {}
+
+    module = os.path.splitext(module)[0]
+
+    extra['module'] = module
+    extra['year'] = datetime.date.today().year
+
+    cwd = os.getcwdu()
+    tmpd = tempfile.mkdtemp()
+    try:
+        os.chdir(tmpd)
+        cookiecutter('gh:jamercee/cookiecutter-pyext',
+                     extra_context=extra, no_input=no_input)
+
+        # Look for C++ first, then fallback to .C
+
+        src = os.path.join(module, module + '_module.cpp')
+        tgt = os.path.join(tgtdir, module + '_module.cpp')
+        if not os.path.exists(src):
+            src = os.path.join(module, module + '.c')
+            tgt = os.path.join(tgtdir, module + '.c')
+
+        if os.path.exists(tgt):
+            LOG.info(">>> Skipped overwritting target %s", tgt)
+            return
+
+        shutil.copyfile(src, tgt)
+
+        # Is this a project?
+
+        if 'project_type' in extra:
+            # Copy doc *.rst
+            docdir = os.path.abspath(os.path.join(tgtdir, '../docs'))
+            if os.path.isdir(docdir):
+                src = os.path.join(module, module + '.rst')
+                tgt = os.path.join(docdir, module + '.rst')
+                if os.path.isfile(src):
+                    shutil.copyfile(src, tgt)
+            # Copy unittest
+            tstdir = os.path.abspath(os.path.join(tgtdir, '../tests'))
+            if os.path.isdir(tstdir):
+                src = os.path.join(module, 'test' + module + '.py')
+                tgt = os.path.join(tstdir, 'test' + module + '.py')
+                if os.path.isfile(src):
+                    shutil.copyfile(src, tgt)
+
+    finally:
+        os.chdir(cwd)
+        shutil.rmtree(tmpd, ignore_errors=True)
+
+
 def add_pysource(module, tgtdir, no_input=False, extra=None):
     r"""Add new source *module* to *tgtdir*. If *no_input* is ``True``, user
     will be prompted to answer questions. *extra* is a dictionary of optional
     key/values passed to cookiecutter as default overrides. If the key
     'project_type' exists in extra, then any ``*.rst`` files will be installed
-    in ``tgtdir/../../docs`` and any ``test*.py`` will be installed in
-    ``tgtdir/../../tests``."""
+    in ``tgtdir/../docs`` and any ``test*.py`` will be installed in
+    ``tgtdir/../tests``."""
 
     extra = extra or {}
 
-    if module.endswith('.py'):
-        module = module[:-3]
+    module = os.path.splitext(module)[0]
     extra['module'] = module
     extra['year'] = datetime.date.today().year
 
@@ -384,24 +447,33 @@ def add_pysource(module, tgtdir, no_input=False, extra=None):
                      extra_context=extra, no_input=no_input)
         src = os.path.join(module, module + '.py')
         tgt = os.path.join(tgtdir, module + '.py')
+
+        if os.path.exists(tgt):
+            LOG.info(">>> Skipped overwritting target %s", tgt)
+            return
+
+        LOG.debug("copy %s -> %s", src, tgt)
         shutil.copyfile(src, tgt)
 
         # Is this a project?
 
         if 'project_type' in extra:
+            LOG.debug("Recognized as a project_type")
             # Copy doc *.rst
-            docdir = os.path.abspath(os.path.join(tgtdir, '../../docs'))
+            docdir = os.path.abspath(os.path.join(tgtdir, '../docs'))
             if os.path.isdir(docdir):
                 src = os.path.join(module, module + '.rst')
                 tgt = os.path.join(docdir, module + '.rst')
                 if os.path.isfile(src):
+                    LOG.debug("copy %s -> %s", src, tgt)
                     shutil.copyfile(src, tgt)
             # Copy unittest
-            tstdir = os.path.abspath(os.path.join(tgtdir, '../../tests'))
+            tstdir = os.path.abspath(os.path.join(tgtdir, '../tests'))
             if os.path.isdir(tstdir):
                 src = os.path.join(module, 'test' + module + '.py')
                 tgt = os.path.join(tstdir, 'test' + module + '.py')
                 if os.path.isfile(src):
+                    LOG.debug("copy %s -> %s", src, tgt)
                     shutil.copyfile(src, tgt)
     finally:
         os.chdir(cwd)
@@ -461,8 +533,31 @@ class Pyjig(object):
         if not self.args.excludegit:
             git_init(self.pdir)
 
+    def add_project_extension(self, no_input=False):
+        r"""Add one or more extension modules to a project's ``~/src/``
+        directory. The project is determined from the current working
+        directory. If we are not in a project folder, then the extension file will
+        be put in the current directory."""
+
+        if self.pdir:
+            idfn = os.path.join(self.pdir, 'id.txt')
+            extra = ast.literal_eval(open(idfn).read())
+            tgtdir = os.path.join(self.pdir, 'src')
+            extra['project'] = self.project_slug
+        else:
+            extra = {}
+            tgtdir = os.getcwdu()
+
+        extra['year'] = datetime.date.today().year
+
+        for ext in self.args.ext:
+            add_pyextension(ext, tgtdir, no_input, extra)
+
+        if self.pdir:
+            subprocess.check_call(['git', 'add', '.'])
+
     def add_project_sourcefile(self, no_input=False):
-        r"""Add one or more sourcefiles to a project's ``~/src/project_slug/``
+        r"""Add one or more sourcefiles to a project's ``~/src/``
         directory. The project is determined from the current working
         directory. If we are not in a project folder, then the source file will
         be put in the current directory."""
@@ -470,7 +565,7 @@ class Pyjig(object):
         if self.pdir:
             idfn = os.path.join(self.pdir, 'id.txt')
             extra = ast.literal_eval(open(idfn).read())
-            tgtdir = os.path.join(self.pdir, 'src', extra['project_slug'])
+            tgtdir = os.path.join(self.pdir, 'src')
             extra['project'] = self.project_slug
         else:
             extra = {}
@@ -506,13 +601,15 @@ def main():
         LOG.info(">>> Option: Create new application'%s'.", args.app[0])
     if args.pkg:
         LOG.info(">>> Option: Create new package '%s'.", args.pkg[0])
+    if args.ext:
+        LOG.info(">>> Option: Add extension module '%s'.", args.ext[0])
     if args.source:
         LOG.info(">>> Option: Add new sourcefile(s) '%s'.",
                  ','.join(args.source))
 
     # Validate arguments
 
-    if not args.app and not args.pkg and not args.source:
+    if not any((args.app, args.pkg, args.ext, args.source)):
         LOG.error('>>> Must either create app/mod or add source.')
         parser.print_help()
         return -1
@@ -536,7 +633,10 @@ def main():
     if args.app or args.pkg:
         proj.create_project()
 
-    if args.source:
+    if args.ext:
+        proj.add_project_extension()
+
+    elif args.source:
         proj.add_project_sourcefile()
 
 
