@@ -2,14 +2,14 @@
 # vim: set fileencoding=utf-8
 # pylint:disable=line-too-long
 r"""Pyjig - Quickly create python projects from templates
-#####################################################
+#########################################################
 
 :Author: Jim Carroll <jim@carroll.net>
 :Description: Quickly create python projects from templates
 
 Pyjig quickly creates new python projects using pre-created templates. Projects
 can be simple scripts, distutils packages or full blown applications.  Pyjig
-can even add python source modules to existing projects.
+can even add python source modules and c extensions to existing projects.
 
 Pyjig is a wrapper around `Cookiecutter <http://cookiecutter.rtfd.org>`_,
 which is a command-line utility that creates projects from ``cookiecutters``
@@ -22,17 +22,21 @@ Pyjig uses four public repos hosted with github:
 +---------------------------------------------------+----------------------------------+
 | Repo                                              | Description                      |
 +===================================================+==================================+
-| https://github.org/jamercee/cookiecutter-pyapp    | Python application type projects |
+| https://github.com/jamercee/cookiecutter-pyapp    | Python application type projects |
 +---------------------------------------------------+----------------------------------+
-| https://github.org/jamercee/cookiecutter-pypkg    | Python package type projects     |
+| https://github.com/jamercee/cookiecutter-pypkg    | Python package type projects     |
 +---------------------------------------------------+----------------------------------+
-| https://github.org/jamercee/cookiecutter-pysource | Create python source             |
+| https://github.com/jamercee/cookiecutter-pysource | Create python source             |
 +---------------------------------------------------+----------------------------------+
-| https://github.org/jamercee/cookiecutter-pyext    | Create python extension          |
+| https://github.com/jamercee/cookiecutter-pyext    | Create python extension          |
 +---------------------------------------------------+----------------------------------+
 
+****************
+Pyjig Background
+****************
+
 Project Motivation
-------------------
+==================
 
 Using python requires developers to employ a full ecosystem of tools. At
 Carroll-Net, all projects require the following tools; `pylint
@@ -47,8 +51,20 @@ from another project which then causes developers to spend time debugging.
 What was needed was a way to ensure uniform deployment and configuration of our
 python architecture and toolchain.
 
-Project Layout
---------------
+Pyjig Name
+==========
+
+Pyjig borrows it's name from the concept of a jig which is a tool used in metal
+and woodworking. A jig is a template that allows one to make duplicates of
+pieces.  The simplest example is a key duplication machine, which uses one key
+as the guide to make copies.
+
+****************
+Projects Details
+****************
+
+Created Project Layout
+======================
 
 Each new project will create the following directories and files::
 
@@ -75,8 +91,14 @@ Each new project will create the following directories and files::
    \---tests            <-- Unittest infrastructure
            __init__.py
 
+Each project root folder includes a copy of ``id.txt``. This file is a copy of
+the cookiecutter settings that were in effect when the project was created. It
+acts as sentinel for project root identification and should not be removed or
+renamed.
+
+
 Makefile generation
--------------------
+===================
 
 Each project will have a cutomized ``Makefile`` installed in the project's
 root directory. It's syntax is written to support `GNU Make
@@ -87,11 +109,13 @@ root directory. It's syntax is written to support `GNU Make
 +=============+=======================================================================+
 | comp        | Perform static analysis (default target)                              |
 +-------------+-----------------------------------------------------------------------+
-| tests       | Run unittests                                                         |
+| tests       | Run unittests after in-lace build                                     |
 +-------------+-----------------------------------------------------------------------+
 | docs        | Generate html documentation                                           |
 +-------------+-----------------------------------------------------------------------+
-| dist        | Build python package                                                  |
+| dist        | Build python software distributions                                   |
++-------------+-----------------------------------------------------------------------+
+| build       | Build everything needed to install                                    |
 +-------------+-----------------------------------------------------------------------+
 | install     | Perform static analysis, run unittests and install to site-packages   |
 +-------------+-----------------------------------------------------------------------+
@@ -109,7 +133,7 @@ root directory. It's syntax is written to support `GNU Make
 +-------------+-----------------------------------------------------------------------+
 
 Static Analysis
----------------
+===============
 
 Python's flexible syntax means that coding errors are difficult to detect until
 runtime. Static analysis tries to solve this by scanning code for coding
@@ -137,7 +161,7 @@ To perform static analysis of code, from within the project's root folder run
    ``*.pyc`` will be re-built.
 
 Code Documentation
-------------------
+==================
 
 Carroll-Net has adopted `Sphinx <http://sphinx-doc.org>`_ as our documentation
 generator for python projects. Sphinx converts `reStructuredText
@@ -155,7 +179,7 @@ Two good references for authoring reST documents are
    * https://pythonhosted.org/an_example_pypi_project/sphinx.html
 
 Version Control
-----------------
+===============
 
 Carroll-Net has adopted Git as our version control system for software. Git is
 a fast, reliable distributed revision control system. Originally developed for
@@ -168,21 +192,17 @@ your local sytem defaults (see `git config ...
 time you use Pyjig to add to an existing project, pyjig will add the source to
 the repo.
 
-Pyjig will not create the repo if invoked with ``--excludegit`` or of the
+Pyjig will not create the repo if invoked with ``--excludegit`` or if the
 dirctory is a subdirectory of an existing git repository. It detects
 repository membership by invoking `git status
 <http://git-scm.com/docs/git-status>`_.
 
-Pyjig Name
-----------
-
-Pyjig borrows it's name from the concept of a jig which is a tool used in metal
-and woodworking. A jig is a template that allows one to make duplicates of
-pieces.  The simplest example is a key duplication machine, which uses one key
-as the guide to make copies.
+***********
+Pyjig Usage
+***********
 
 Installation
-------------
+============
 
 Pyjig is hosted on git hub at https://github.com/jamercee/pyjig
 
@@ -196,12 +216,10 @@ Pyjig can also be installed with pip::
 
    pip install pyjig
 
-
-********************
 Command line options
-********************
+====================
 
-*usage:* ``pyjig  [-?] [-d] [--pkg PKG] [--app APP] [--ext EXT] [-x] [source [source ..]]``
+*usage:* ``pyjig  [-?] [-d] [--pkg PKG] [--app APP] [--ext EXT [EXT ...]] [-x] [source [source ..]]``
 
 Positional arguments
 --------------------
@@ -215,17 +233,174 @@ source
 Optional argument:
 ------------------
 
--h          Display help and exit.
+-?, -h, --help        Display help and exit.
 
--d          Generate diagnotic output.
+-d, --debug           Generate diagnotic output.
 
---pkg PKG   Create a distutils package project.
+--pkg PKG             Create a distutils package project.
 
---app APP   Create an application type project.
+--app APP             Create an application type project.
 
---ext EXT   Add an extension module to the existing project.
+--ext EXT [EXT ...]   Add an extension module(s) to the existing project.
 
--x          Do not initialize git repo and do not add new source to git repo.
+-x, --exludegit       Do not initialize git repo and do not add new source to git repo.
+
+
+Example Usage
+=============
+
+In the examples that follow, the ``--quiet`` flag is used to accept the default
+cookiecutter answers (and to keep our example brief).  Some of the default
+answers may not be appropriate for your project until you configure
+cookiecutter. An example of how todo this is also provided.
+
+New package project with python source files
+--------------------------------------------
+
+Typically, the workflow is to create a new project and then to add source files
+to it. For example, to create a new package called ``mypkg`` and to the then
+add three source files, you would do the following::
+
+   $ pyjig --quiet --pkg mypkg
+   $ cd mypkg
+   $ pyjig --quiet s1 s2 s3
+
+   $ git status --short
+   A  docs/s1.rst
+   A  docs/s2.rst
+   A  docs/s3.rst
+   A  src/s1.py
+   A  src/s2.py
+   A  src/s3.py
+   A  tests/tests1.py
+   A  tests/tests2.py
+   A  tests/tests3.py
+
+New application project with python source
+------------------------------------------
+
+Application projects are similar to package projects with the main difference
+being how the ``setup.py`` is created. Application projects use the setuptools
+``entry_points`` attribute to cause the install to create a python command
+script::
+
+   $ pyjig --quiet --app myapp
+   $ cd myapp
+   $ pyjig --quiet mycmd
+
+   $ git status --short
+   A  docs/mycmd.rst
+   A  src/mycmd.py
+   A  tests/testmycmd.py
+
+Create a single python source file
+----------------------------------
+
+If you only need to create a python source file without the application or
+package ecosystem, you can just use the source command. A simple example::
+
+   $ pyjig -q source
+
+This will create a single ``source.py`` in your current directory.
+
+
+New project with C++ extension
+------------------------------
+
+C++ Extensions enable developers to extend the Python interpreter with new
+modules. Pyjig comes with support for creating new projects with these
+extensions. To create a new C++ Extension you would typically do::
+
+   $ pyjig --quiet --pkg mymod
+   $ cd mymod
+   $ pyjig --quiet --ext e1
+
+   $ git status --short
+   A  docs/e1.rst
+   A  src/e1_module.cpp
+   A  tests/teste1.py
+
+Pyjig will not add the new module to the ``setup.py`` file. This is an
+important step that needs to be done by the developer to cause the
+module to be rebuilt. The instructions for how todo this are included as a
+comment at the top of the newly created module file::
+
+   $ head -n 15 src/e1_module.cpp
+   /*
+   This module needs to be manually added to your setup.py. Consider
+   adding the following lines:
+
+       from setuptools import Extension
+
+       module = Extension('mymod.e1',
+                   sources = ['src/e1_module.cpp'],
+                   )
+
+       setup(...
+           ext_modules = [ module ],
+           )
+   */
+
+Defining New Types with C++ Extension
+-------------------------------------
+
+Extensions can be used to create new types that can be manipulated from Python
+code, much like strings and lists in core Python. The pyjig C++ Extension
+system has specialized sections that can be included to create these types. You
+cannot create these modules using ``--quiet`` as it requies the developer to
+specify the name of the new type during the cookicutter build step. Here's an
+example::
+
+   $ pyjig --quiet --pkg mytype
+   $ cd mytype
+   $ pyjig --ext mytype
+   >>> Option: Add extension module 'mytype'.
+   You've cloned C:\cygwin64\home\jimc\.cookiecutters\cookiecutter-pyext before.
+   Is it okay to delete and re-clone it? [yes]:
+   Cloning into 'cookiecutter-pyext'...
+   remote: Counting objects: 29, done.
+   remote: Compressing objects: 100% (21/21), done.
+   remote: Total 29 (delta 13), reused 24 (delta 8), pack-reused 0
+   Unpacking objects: 100% (29/29), done.
+   Checking connectivity... done.
+   module [mytype]:
+   module_short_description [short module description]:
+   project [mytype]:
+   new_type []: Mytype         <--- Give your new type a name here
+   version [1.0]:
+   release [1.0.1]:
+   python [python2.7]:
+   author [Jim Carroll]:
+   email [jim@carroll.net]:
+   year [2015]:
+   copyright [Copyright(c) 2015, Carroll-Net, Inc., All Rights Reserved]:
+
+In the example above, the fifth question allows the developer to give their new
+type a name. Any non-default answer will cause additional code to be included
+in the project to create new custom types.
+
+.. note::
+   Remember to add the new module to ``setup.py``
+
+
+Override cookiecutter defaults
+------------------------------
+
+Cookiecutter projects are bundled with a collection of key/value pairs delivered
+in a JSON file. You can override the defaults by creating your own
+``~/.cookiecutterrc`` file.
+
+.. note::
+   To see where you should create your ``.cookiecutterrc`` file, execue the command
+   ``python -c "import os; print os.path.expanduser('~/.cookiecutterrc')"``
+
+Each pyjig project has a collection of common key/value settings. Add these
+settings to your ``.cookiecutterrc`` file to create overrides::
+
+   default_context:
+       author: "Bob Jones"
+       email: "bob@jones.com"
+       copyright: "Copyright(c) {{cookiecutter.year}}, Jones, Inc., All Rights Reserved"
 
 ..
    Copyright(c), 2015, Carroll-Net, Inc., All Rights Reserved."""
@@ -247,7 +422,7 @@ import tempfile
 # ----------------------------------------------------------------------------
 # Module level initializations
 # ----------------------------------------------------------------------------
-__version__    = '1.0.13'
+__version__    = '1.0.14'
 __author__     = 'Jim Carroll'
 __email__      = 'jim@carroll.net'
 __copyright__  = 'Copyright(c) 2015, Carroll-Net, Inc, All Rights Reserved.'
@@ -290,12 +465,16 @@ def init_parser():
         help='Create an application type project')
     parser.add_argument(
         '--ext',
-        nargs=1,
-        help='Add extension module to existing project')
+        nargs='+',
+        help='Add extension module(s) to existing project')
     parser.add_argument(
         '-x', '--excludegit',
         action='store_true', default=False,
         help='Do not initialize a git repository.')
+    parser.add_argument(
+        '-q', '--quiet',
+        action='store_true', default=False,
+        help='Quiet, do not prompt, accept defaults.')
     parser.add_argument(
         'source',
         nargs='*',
@@ -400,6 +579,7 @@ def add_pyextension(module, tgtdir, no_input=False, extra=None):
             LOG.info(">>> Skipped overwritting target %s", tgt)
             return
 
+        LOG.debug("copy %s -> %s", src, tgt)
         shutil.copyfile(src, tgt)
 
         # Is this a project?
@@ -410,14 +590,16 @@ def add_pyextension(module, tgtdir, no_input=False, extra=None):
             if os.path.isdir(docdir):
                 src = os.path.join(module, module + '.rst')
                 tgt = os.path.join(docdir, module + '.rst')
-                if os.path.isfile(src):
+                if os.path.isfile(src) and not os.path.exists(tgt):
+                    LOG.debug("copy %s -> %s", src, tgt)
                     shutil.copyfile(src, tgt)
             # Copy unittest
             tstdir = os.path.abspath(os.path.join(tgtdir, '../tests'))
             if os.path.isdir(tstdir):
                 src = os.path.join(module, 'test' + module + '.py')
                 tgt = os.path.join(tstdir, 'test' + module + '.py')
-                if os.path.isfile(src):
+                if os.path.isfile(src) and not os.path.exists(tgt):
+                    LOG.debug("copy %s -> %s", src, tgt)
                     shutil.copyfile(src, tgt)
 
     finally:
@@ -464,7 +646,7 @@ def add_pysource(module, tgtdir, no_input=False, extra=None):
             if os.path.isdir(docdir):
                 src = os.path.join(module, module + '.rst')
                 tgt = os.path.join(docdir, module + '.rst')
-                if os.path.isfile(src):
+                if os.path.isfile(src) and not os.path.exists(tgt):
                     LOG.debug("copy %s -> %s", src, tgt)
                     shutil.copyfile(src, tgt)
             # Copy unittest
@@ -472,7 +654,7 @@ def add_pysource(module, tgtdir, no_input=False, extra=None):
             if os.path.isdir(tstdir):
                 src = os.path.join(module, 'test' + module + '.py')
                 tgt = os.path.join(tstdir, 'test' + module + '.py')
-                if os.path.isfile(src):
+                if os.path.isfile(src) and not os.path.exists(tgt):
                     LOG.debug("copy %s -> %s", src, tgt)
                     shutil.copyfile(src, tgt)
     finally:
@@ -514,6 +696,8 @@ class Pyjig(object):
     def create_project(self, no_input=False):
         r"""Create a new project of either 'app' or 'pkg' type"""
 
+        no_input = no_input or self.args.quiet
+
         extra = {
             'project_type': self.ptype,
             'project_name': self.project_name,
@@ -539,6 +723,8 @@ class Pyjig(object):
         directory. If we are not in a project folder, then the extension file will
         be put in the current directory."""
 
+        no_input = no_input or self.args.quiet
+
         if self.pdir:
             idfn = os.path.join(self.pdir, 'id.txt')
             extra = ast.literal_eval(open(idfn).read())
@@ -561,6 +747,8 @@ class Pyjig(object):
         directory. The project is determined from the current working
         directory. If we are not in a project folder, then the source file will
         be put in the current directory."""
+
+        no_input = no_input or self.args.quiet
 
         if self.pdir:
             idfn = os.path.join(self.pdir, 'id.txt')
@@ -597,6 +785,8 @@ def main():
         LOG.setLevel(logging.DEBUG)
     if args.excludegit:
         LOG.info('>>> Option: Do not initialize git repo.')
+    if args.quiet:
+        LOG.info('>>> Options: Quiet, do not prompt, accept defaults.')
     if args.app:
         LOG.info(">>> Option: Create new application'%s'.", args.app[0])
     if args.pkg:
