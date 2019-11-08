@@ -31,8 +31,8 @@ setup(
 
     # Testing (assumes you have nose installed)
 
-    test_suite      = 'nose.collector',
-    tests_require   = ['nose>=1.3.4'],
+    test_suite = 'nose.collector',
+    tests_require = ['nose>=1.3.4'],
 
     install_requires  = [
         'markupsafe>=0.23',

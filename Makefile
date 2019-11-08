@@ -3,9 +3,9 @@
 # ----------------------------------------------------------------------------
 ifeq ($(OS), Windows_NT)
 	OSTYPE := Windows
-	PYTHON := C:/Python27/python.exe
-	PYLINT := C:/Python27/Scripts/pylint.exe
-	FLAKE := C:/Python27/Scripts/flake8.exe
+	PYTHON := python.exe
+	PYLINT := pylint.exe
+	FLAKE := flake8.exe
 else
 	OSTYPE := $(shell uname)
 	PYTHON := pthon2.7
@@ -31,16 +31,16 @@ BROWSER := python -c "$$BROWSER_PYSCRIPT"
 # ----------------------------------------------------------------------------
 # Rule to compile python *.py -> *.pyc
 # ----------------------------------------------------------------------------
-%.pyc:	%.py
+%.pylint:	%.py
 	@echo Check $<
 	@$(PYLINT) -rn --rcfile pylint.rc $<
 	@$(FLAKE) $<
-	@$(PYTHON) -c 'import py_compile; py_compile.compile("$<")'
+	@touch $@
 
 # ----------------------------------------------------------------------------
 
 SOURCE := $(wildcard src/pyjig/*.py) $(wildcard tests/*.py)
-TGTS := $(patsubst %.py, %.pyc,$(SOURCE))
+TGTS := $(patsubst %.py, %.pylint,$(SOURCE))
 
 .PHONY: clean clean-build clean-docs clean-pyc comp debug docs help 
 
@@ -62,6 +62,13 @@ comp: $(TGTS)
 
 tests: comp
 	@$(PYTHON) setup.py test
+	#
+# Run specified test-case with nose, full debugging output
+ntest-debug: comp
+	@$(PYTHON) setup.py nosetests --verbosity=3 \
+		--nocapture \
+		-l testpyjig \
+		--tests tests.testpyjig:Testpyjig.test_add_project_extension
 
 docs:
 	@$(MAKE) -C docs html
@@ -87,10 +94,12 @@ clean-build:
 	find . -name '*.egg' -exec rm -fr {} +
 
 clean-pyc:
-	find . -name '*.py[co]' -exec rm -f {} +
+	find . -name '*.py[cod]' -exec rm -f {} +
+	find . -name '*.pylint' -exec rm -f {} +
 	find . -name '*.pln' -exec rm -f {} +
 	find . -name '~*' -exec rm -f {} +
-	find . -name '__pycache__' -exec -fr {} +
+	find . -name '__pycache__' -exec rm -fr {} +
+
 
 clean-docs:
 	$(MAKE) -C docs clean

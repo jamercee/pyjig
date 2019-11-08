@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python
 # vim: set fileencoding=utf-8
 # pylint:disable=line-too-long
 r"""Pyjig - Quickly create python projects from templates
@@ -408,7 +408,6 @@ settings to your ``.cookiecutterrc`` file to create overrides::
 # ----------------------------------------------------------------------------
 # Standard library imports
 # ----------------------------------------------------------------------------
-from cookiecutter.main import cookiecutter
 import argparse
 import ast
 import datetime
@@ -420,12 +419,17 @@ import sys
 import tempfile
 
 # ----------------------------------------------------------------------------
+# 3rd party imports
+# ----------------------------------------------------------------------------
+from cookiecutter.main import cookiecutter
+
+# ----------------------------------------------------------------------------
 # Module level initializations
 # ----------------------------------------------------------------------------
-__version__    = '1.0.14'
-__author__     = 'Jim Carroll'
-__email__      = 'jim@carroll.net'
-__copyright__  = 'Copyright(c) 2015, Carroll-Net, Inc, All Rights Reserved.'
+__version__ = '1.1.0'
+__author__ = 'Jim Carroll'
+__email__  = 'jim@carroll.net'
+__copyright__ = 'Copyright(c) 2015, Carroll-Net, Inc, All Rights Reserved.'
 
 LOG = logging.getLogger('pyjig')
 
@@ -504,7 +508,7 @@ def inpath(exe):
 def git_init(sdir):
     r"""Initialize git repository in directory *sdir*"""
 
-    cwd = os.getcwdu()
+    cwd = os.getcwd()
     try:
         run = subprocess.check_call
 
@@ -528,7 +532,7 @@ def find_project_root():
     directory for the ``id.txt`` file. Returns the directory of the project's
     root, or None if not match was found."""
 
-    idpth = os.path.join(os.getcwdu(), 'id.txt')
+    idpth = os.path.join(os.getcwd(), 'id.txt')
 
     while not os.path.isfile(idpth):
 
@@ -560,7 +564,7 @@ def add_pyextension(module, tgtdir, no_input=False, extra=None):
     extra['module'] = module
     extra['year'] = datetime.date.today().year
 
-    cwd = os.getcwdu()
+    cwd = os.getcwd()
     tmpd = tempfile.mkdtemp()
     try:
         os.chdir(tmpd)
@@ -596,8 +600,8 @@ def add_pyextension(module, tgtdir, no_input=False, extra=None):
             # Copy unittest
             tstdir = os.path.abspath(os.path.join(tgtdir, '../tests'))
             if os.path.isdir(tstdir):
-                src = os.path.join(module, 'test' + module + '.py')
-                tgt = os.path.join(tstdir, 'test' + module + '.py')
+                src = os.path.join(module, 'test_' + module + '.py')
+                tgt = os.path.join(tstdir, 'test_' + module + '.py')
                 if os.path.isfile(src) and not os.path.exists(tgt):
                     LOG.debug("copy %s -> %s", src, tgt)
                     shutil.copyfile(src, tgt)
@@ -621,7 +625,7 @@ def add_pysource(module, tgtdir, no_input=False, extra=None):
     extra['module'] = module
     extra['year'] = datetime.date.today().year
 
-    cwd = os.getcwdu()
+    cwd = os.getcwd()
     tmpd = tempfile.mkdtemp()
     try:
         os.chdir(tmpd)
@@ -652,8 +656,8 @@ def add_pysource(module, tgtdir, no_input=False, extra=None):
             # Copy unittest
             tstdir = os.path.abspath(os.path.join(tgtdir, '../tests'))
             if os.path.isdir(tstdir):
-                src = os.path.join(module, 'test' + module + '.py')
-                tgt = os.path.join(tstdir, 'test' + module + '.py')
+                src = os.path.join(module, 'test_' + module + '.py')
+                tgt = os.path.join(tstdir, 'test_' + module + '.py')
                 if os.path.isfile(src) and not os.path.exists(tgt):
                     LOG.debug("copy %s -> %s", src, tgt)
                     shutil.copyfile(src, tgt)
@@ -662,7 +666,7 @@ def add_pysource(module, tgtdir, no_input=False, extra=None):
         shutil.rmtree(tmpd, ignore_errors=True)
 
 
-class Pyjig(object):
+class Pyjig:
     r"""Template driven project creation."""
 
     def __init__(self, args):
@@ -732,7 +736,7 @@ class Pyjig(object):
             extra['project'] = self.project_slug
         else:
             extra = {}
-            tgtdir = os.getcwdu()
+            tgtdir = os.getcwd()
 
         extra['year'] = datetime.date.today().year
 
@@ -757,7 +761,7 @@ class Pyjig(object):
             extra['project'] = self.project_slug
         else:
             extra = {}
-            tgtdir = os.getcwdu()
+            tgtdir = os.getcwd()
 
         extra['year'] = datetime.date.today().year
 
@@ -825,9 +829,10 @@ def main():
 
     if args.ext:
         proj.add_project_extension()
-
     elif args.source:
         proj.add_project_sourcefile()
+
+    return 0
 
 
 if __name__ == '__main__':
