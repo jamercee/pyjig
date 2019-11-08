@@ -25,6 +25,8 @@ import subprocess
 import tempfile
 import unittest
 
+from pyjig import pyjig
+
 # ----------------------------------------------------------------------------
 # Module level initializations
 # ----------------------------------------------------------------------------
@@ -35,8 +37,6 @@ __status__     = 'Testing'
 __copyright__  = 'Copyright(c) 2015, Carroll-Net, Inc., All Rights Reserved.'
 
 LOG = logging.getLogger('testpyjig')
-
-from pyjig import pyjig
 
 
 class Testpyjig(unittest.TestCase):
@@ -74,7 +74,7 @@ class Testpyjig(unittest.TestCase):
 
         parser = pyjig.init_parser()
 
-        cwd = os.getcwdu()
+        cwd = os.getcwd()
         try:
             os.chdir(self.tmpd)
 
@@ -118,7 +118,7 @@ class Testpyjig(unittest.TestCase):
 
         parser = pyjig.init_parser()
 
-        cwd = os.getcwdu()
+        cwd = os.getcwd()
         try:
             os.chdir(self.tmpd)
 
@@ -160,7 +160,7 @@ class Testpyjig(unittest.TestCase):
     def test_add_pysource(self):
         r"""test the simple add_pysource()"""
 
-        cwd = os.getcwdu()
+        cwd = os.getcwd()
         try:
             os.chdir(self.tmpd)
             pyjig.add_pysource('source', self.tmpd, no_input=True)
@@ -173,7 +173,7 @@ class Testpyjig(unittest.TestCase):
 
         parser = pyjig.init_parser()
 
-        cwd = os.getcwdu()
+        cwd = os.getcwd()
         try:
             os.chdir(self.tmpd)
 
@@ -195,7 +195,7 @@ class Testpyjig(unittest.TestCase):
             for src in ('s1', 's2', 's3'):
                 self.assertIn(src + '.py', apps)
                 self.assertIn(src + '.rst', docs)
-                self.assertIn('test' + src + '.py', tsts)
+                self.assertIn('test_' + src + '.py', tsts)
 
                 txt = open('docs/%s.rst' % src).read()
                 self.assertIn('.. automodule:: %s' % src, txt)
@@ -212,7 +212,7 @@ class Testpyjig(unittest.TestCase):
 
         parser = pyjig.init_parser()
 
-        cwd = os.getcwdu()
+        cwd = os.getcwd()
         try:
             os.chdir(self.tmpd)
 
@@ -236,7 +236,7 @@ class Testpyjig(unittest.TestCase):
     def test_add_pyextension(self):
         r"""test the simple add_pyextension()"""
 
-        cwd = os.getcwdu()
+        cwd = os.getcwd()
         try:
             os.chdir(self.tmpd)
             pyjig.add_pyextension('mod', self.tmpd, no_input=True)
@@ -251,7 +251,7 @@ class Testpyjig(unittest.TestCase):
 
         parser = pyjig.init_parser()
 
-        cwd = os.getcwdu()
+        cwd = os.getcwd()
         try:
             os.chdir(self.tmpd)
 
@@ -272,7 +272,7 @@ class Testpyjig(unittest.TestCase):
 
             self.assertIn('e1_module.cpp', apps)
             self.assertIn('e1.rst', docs)
-            self.assertIn('teste1.py', tsts)
+            self.assertIn('test_e1.py', tsts)
 
             txt = open('docs/e1.rst').read()
             self.assertIn('.. automodule:: e1', txt)

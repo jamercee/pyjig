@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python
 # vim: set fileencoding=utf-8
 # pylint:disable=line-too-long
 r"""Pyjig - Quickly create python projects from templates
@@ -408,7 +408,6 @@ settings to your ``.cookiecutterrc`` file to create overrides::
 # ----------------------------------------------------------------------------
 # Standard library imports
 # ----------------------------------------------------------------------------
-from cookiecutter.main import cookiecutter
 import argparse
 import ast
 import datetime
@@ -420,12 +419,17 @@ import sys
 import tempfile
 
 # ----------------------------------------------------------------------------
+# 3rd party imports
+# ----------------------------------------------------------------------------
+from cookiecutter.main import cookiecutter
+
+# ----------------------------------------------------------------------------
 # Module level initializations
 # ----------------------------------------------------------------------------
-__version__    = '1.0.14'
-__author__     = 'Jim Carroll'
-__email__      = 'jim@carroll.net'
-__copyright__  = 'Copyright(c) 2015, Carroll-Net, Inc, All Rights Reserved.'
+__version__ = '1.1.0'
+__author__ = 'Jim Carroll'
+__email__  = 'jim@carroll.net'
+__copyright__ = 'Copyright(c) 2015, Carroll-Net, Inc, All Rights Reserved.'
 
 LOG = logging.getLogger('pyjig')
 
@@ -662,7 +666,7 @@ def add_pysource(module, tgtdir, no_input=False, extra=None):
         shutil.rmtree(tmpd, ignore_errors=True)
 
 
-class Pyjig(object):
+class Pyjig:
     r"""Template driven project creation."""
 
     def __init__(self, args):
@@ -825,9 +829,10 @@ def main():
 
     if args.ext:
         proj.add_project_extension()
-
     elif args.source:
         proj.add_project_sourcefile()
+
+    return 0
 
 
 if __name__ == '__main__':
